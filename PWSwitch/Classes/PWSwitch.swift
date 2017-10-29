@@ -15,6 +15,8 @@ open class PWSwitch: UIControl {
     var backLayer: CALayer!
     var thumbLayer: CALayer!
     
+    var initialTouchPoint = CGPoint.zero
+    
     open var on = false
     
     /// UIAppearance compatible property
@@ -308,6 +310,8 @@ open class PWSwitch: UIControl {
     override open func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         
+        initialTouchPoint = touches.first?.location(in: self) ?? CGPoint.zero
+        
         if (on) {
             let thumbBoundsAnimation = CABasicAnimation(keyPath: "bounds")
             thumbBoundsAnimation.timingFunction = CAMediaTimingFunction(controlPoints: 0.175, 0.885, 0.32, 1.275)
@@ -416,9 +420,9 @@ open class PWSwitch: UIControl {
     override open func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
         
-        let touchPoint = touches.first?.location(in: self)
-        if (self.bounds.contains(touchPoint!)) {
-            if (on) {
+        let touchPoint = touches.first?.location(in: self) ?? CGPoint.zero
+        if (self.bounds.contains(touchPoint)) || (on && initialTouchPoint.x - touchPoint.x > 0) || (!on && initialTouchPoint.x - touchPoint.x < 0) {
+           if (on) {
                 onToOffAnim()
             } else {
                 offToOnAnim()
